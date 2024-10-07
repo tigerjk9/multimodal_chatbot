@@ -5,10 +5,10 @@ import base64
 from io import BytesIO
 import os
 
-# Streamlit 페이지 설정 (화면을 더 넓게 활용하기 위해 'wide' 레이아웃 적용)
+# Streamlit 페이지 설정
 st.set_page_config(page_title="멀티모달 교육 피드백 챗봇", layout="wide")
 
-# CSS 스타일 - 화면을 넓게 활용하기 위한 설정
+# CSS 스타일
 css = """
 .main-title {
     font-size: 2.5em;
@@ -63,20 +63,16 @@ st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 # API 키 설정 함수
 def set_openai_api_key():
     if "openai_api_key" not in st.session_state:
-        # 환경 변수에서 API 키를 가져옴
-        st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY")
+        st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY", "")
 
-    # API 키 입력란 유지
-    openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (선택사항):", type="password")
+    openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (선택사항):", type="password", value=st.session_state.openai_api_key)
     if openai_api_key:
         st.session_state.openai_api_key = openai_api_key
-
-    if st.session_state.openai_api_key:
-        openai.api_key = st.session_state.openai_api_key
+        openai.api_key = openai_api_key
 
 # 입력을 처리하는 함수
 def process_input(input_content, input_type, criteria, custom_prompt):
-    if not openai.api_key:
+    if not st.session_state.openai_api_key:
         return "API 키가 설정되지 않았습니다. 환경 변수나 사이드바에서 API 키를 입력하세요."
 
     system_message = """
@@ -94,22 +90,20 @@ def process_input(input_content, input_type, criteria, custom_prompt):
     """
 
     try:
-        # 텍스트와 이미지 모두 gpt-4를 사용하여 처리
         messages = [
             {"role": "system", "content": system_message},
-            {"role": "user", "content": f"이 {input_type}를 {criteria}에 맞춰 평가해줘: {input_content[:1000]}..."}  # 메시지 길이 제한
+            {"role": "user", "content": f"이 {input_type}를 {criteria}에 맞춰 평가해줘: {input_content[:1000]}..."}
         ]
 
-        response = openai.Completion.create(
-            engine="gpt-4",
-            prompt='
-'.join([msg['content'] for msg in messages]),
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=messages,
             max_tokens=500
         )
 
-        return response['choices'][0]['text']
+        return response['choices'][0]['message']['content']
 
-    except openai.OpenAIError as e:
+    except openai.error.OpenAIError as e:
         return f"API 오류가 발생했습니다: {str(e)}"
     except Exception as e:
         return f"알 수 없는 오류가 발생했습니다: {str(e)}"
@@ -121,7 +115,7 @@ def main():
     st.markdown("""
     <div class='service-summary'>
         이 챗봇은 여러분의 학습 여정을 돕기 위해 만들어졌어요! 📚✨<br>
-        여러분이 작성한 텍스트나 그린 그림을 분석해서 꼼꼼한 피드백을 제공해드려요. 💋▲▲<br>
+        여러분이 작성한 텍스트나 그린 그림을 분석해서 꼼꼼한 피드백을 제공해드려요. 💌<br>
         맞춤형 조언으로 여러분의 실력 향상을 응원합니다. 함께 성장해 나가요! 🚀😊
     </div>
     """, unsafe_allow_html=True)
@@ -159,10 +153,7 @@ def main():
         if input_type == "텍스트":
             input_content = st.text_area("텍스트를 입력하세요")
             if st.button("피드백 생성"):
-                if st.session_state.openai_api_key:
-                    feedback = process_input(input_content, '텍스트', criteria, custom_prompt if use_custom_prompt else "")
-                else:
-                    feedback = "API 키가 설정되지 않았습니다. 환경 변수나 사이드바에서 API 키를 입력하세요."
+                feedback = process_input(input_content, '텍스트', criteria, custom_prompt if use_custom_prompt else "")
                 st.session_state.feedback = feedback
 
         elif input_type == "이미지":
@@ -178,10 +169,7 @@ def main():
                 image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
                 if st.button("피드백 생성"):
-                    if st.session_state.openai_api_key:
-                        feedback = process_input(image_base64, '이미지', criteria, custom_prompt if use_custom_prompt else "")
-                    else:
-                        feedback = "API 키가 설정되지 않았습니다. 환경 변수나 사이드바에서 API 키를 입력하세요."
+                    feedback = process_input(image_base64, '이미지', criteria, custom_prompt if use_custom_prompt else "")
                     st.session_state.feedback = feedback
 
     # 피드백 섹션
