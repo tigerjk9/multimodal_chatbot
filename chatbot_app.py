@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image
-import openai
+from openai import OpenAI
 import base64
 from io import BytesIO
 import os
@@ -68,12 +68,13 @@ def set_openai_api_key():
     openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (선택사항):", type="password", value=st.session_state.openai_api_key)
     if openai_api_key:
         st.session_state.openai_api_key = openai_api_key
-        openai.api_key = openai_api_key
 
 # 입력을 처리하는 함수
 def process_input(input_content, input_type, criteria, custom_prompt):
     if not st.session_state.openai_api_key:
         return "API 키가 설정되지 않았습니다. 환경 변수나 사이드바에서 API 키를 입력하세요."
+
+    client = OpenAI(api_key=st.session_state.openai_api_key)
 
     system_message = """
     넌 학생들에게 친절하고 간결한 피드백을 주는 선생님이야. 다음 지침을 따라줘:
@@ -95,18 +96,16 @@ def process_input(input_content, input_type, criteria, custom_prompt):
             {"role": "user", "content": f"이 {input_type}를 {criteria}에 맞춰 평가해줘: {input_content[:1000]}..."}
         ]
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=messages,
             max_tokens=500
         )
 
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
 
-    except openai.OpenAIError as e:
-        return f"OpenAI API 오류가 발생했습니다: {str(e)}"
     except Exception as e:
-        return f"알 수 없는 오류가 발생했습니다: {str(e)}"
+        return f"OpenAI API 오류가 발생했습니다: {str(e)}"
 
 # 메인 함수
 def main():
