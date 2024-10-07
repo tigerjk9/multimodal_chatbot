@@ -6,8 +6,6 @@ from io import BytesIO
 import os
 from dotenv import load_dotenv
 
-# .env 파일 로드 (현재 디렉토리에 있는 파일을 명시적으로 로드)
-load_dotenv(dotenv_path='.env')
 
 # Streamlit 페이지 설정 (화면을 더 넓게 활용하기 위해 'wide' 레이아웃 적용)
 st.set_page_config(page_title="멀티모달 교육 피드백 챗봇", layout="wide")
