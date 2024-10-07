@@ -6,6 +6,8 @@ from io import BytesIO
 import os
 from dotenv import load_dotenv
 
+# .env 파일 로드 (스트림릿 클라우드에서는 기본 환경 변수 사용)
+load_dotenv()
 
 # Streamlit 페이지 설정 (화면을 더 넓게 활용하기 위해 'wide' 레이아웃 적용)
 st.set_page_config(page_title="멀티모달 교육 피드백 챗봇", layout="wide")
@@ -66,15 +68,19 @@ st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 def set_openai_api_key():
     if "openai_api_key" not in st.session_state:
         # 환경 변수에서 API 키를 가져옴
-        st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key:
+            st.session_state.openai_api_key = api_key
 
     # 만약 환경 변수에 API 키가 없을 경우에만 사용자 입력 받기
     if not st.session_state.openai_api_key:
-        openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (선택사항):", type="password")
+        openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (선택사항):", type="password", key="api_key_input")
         if openai_api_key:
             st.session_state.openai_api_key = openai_api_key
+        else:
+            st.session_state.openai_api_key = None
 
-    if st.session_state.openai_api_key:
+    if st.session_state.openai_api_key is not None:
         openai.api_key = st.session_state.openai_api_key
 
 # 입력을 처리하는 함수
@@ -113,6 +119,8 @@ def process_input(input_content, input_type, criteria, custom_prompt):
 
     except openai.error.OpenAIError as e:
         return f"처리 중 오류가 발생했습니다: {str(e)}"
+    except AttributeError:
+        return "처리 중 오류가 발생했습니다. API 키 또는 기타 설정을 확인하세요."
     except Exception as e:
         return f"알 수 없는 오류가 발생했습니다: {str(e)}"
 
