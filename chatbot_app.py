@@ -103,8 +103,8 @@ def process_input(input_content, input_type, criteria, custom_prompt):
 
         return response['choices'][0]['message']['content']
 
-    except openai.error.OpenAIError as e:
-        return f"API 오류가 발생했습니다: {str(e)}"
+    except openai.OpenAIError as e:
+        return f"OpenAI API 오류가 발생했습니다: {str(e)}"
     except Exception as e:
         return f"알 수 없는 오류가 발생했습니다: {str(e)}"
 
@@ -153,24 +153,29 @@ def main():
         if input_type == "텍스트":
             input_content = st.text_area("텍스트를 입력하세요")
             if st.button("피드백 생성"):
-                feedback = process_input(input_content, '텍스트', criteria, custom_prompt if use_custom_prompt else "")
+                with st.spinner("피드백 생성 중..."):
+                    feedback = process_input(input_content, '텍스트', criteria, custom_prompt if use_custom_prompt else "")
                 st.session_state.feedback = feedback
 
         elif input_type == "이미지":
             uploaded_image = st.file_uploader("이미지를 업로드하세요", type=['png', 'jpg', 'jpeg'])
             if uploaded_image is not None:
-                image = Image.open(uploaded_image)
-                st.image(image, caption="업로드된 이미지", use_column_width=True)
+                try:
+                    image = Image.open(uploaded_image)
+                    st.image(image, caption="업로드된 이미지", use_column_width=True)
 
-                # 이미지를 압축 및 리사이즈하여 토큰 수 줄이기
-                image.thumbnail((512, 512))
-                buffered = BytesIO()
-                image.save(buffered, format="PNG")
-                image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                    # 이미지를 압축 및 리사이즈하여 토큰 수 줄이기
+                    image.thumbnail((512, 512))
+                    buffered = BytesIO()
+                    image.save(buffered, format="PNG")
+                    image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-                if st.button("피드백 생성"):
-                    feedback = process_input(image_base64, '이미지', criteria, custom_prompt if use_custom_prompt else "")
-                    st.session_state.feedback = feedback
+                    if st.button("피드백 생성"):
+                        with st.spinner("피드백 생성 중..."):
+                            feedback = process_input(image_base64, '이미지', criteria, custom_prompt if use_custom_prompt else "")
+                        st.session_state.feedback = feedback
+                except Exception as e:
+                    st.error(f"이미지 처리 중 오류가 발생했습니다: {str(e)}")
 
     # 피드백 섹션
     with col2:
