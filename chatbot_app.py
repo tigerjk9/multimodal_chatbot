@@ -100,13 +100,14 @@ def process_input(input_content, input_type, criteria, custom_prompt):
             {"role": "user", "content": f"이 {input_type}를 {criteria}에 맞춰 평가해줘: {input_content[:1000]}..."}  # 메시지 길이 제한
         ]
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=messages,
-            max_tokens=500  # 응답 토큰 수 설정
+        response = openai.Completion.create(
+            engine="gpt-4",
+            prompt='
+'.join([msg['content'] for msg in messages]),
+            max_tokens=500
         )
 
-        return response['choices'][0]['message']['content']
+        return response['choices'][0]['text']
 
     except openai.OpenAIError as e:
         return f"API 오류가 발생했습니다: {str(e)}"
