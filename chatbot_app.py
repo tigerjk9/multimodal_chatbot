@@ -65,7 +65,7 @@ def set_openai_api_key():
     if "openai_api_key" not in st.session_state:
         st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY", "")
 
-    openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (선택사항):", type="password", value=st.session_state.openai_api_key)
+    openai_api_key = st.text_input("OpenAI API 키를 입력하세요 (필수사항):", type="password", value=st.session_state.openai_api_key)
     if openai_api_key:
         st.session_state.openai_api_key = openai_api_key
 
@@ -99,7 +99,7 @@ def process_input(input_content, input_type, criteria, custom_prompt):
         response = client.chat.completions.create(
             model="gpt-4",
             messages=messages,
-            max_tokens=500
+            max_tokens=800
         )
 
         return response.choices[0].message.content
