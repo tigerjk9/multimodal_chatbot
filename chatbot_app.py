@@ -108,7 +108,7 @@ def process_input(input_content, input_type, criteria, custom_prompt):
 
         return response['choices'][0]['message']['content']
 
-    except openai.error.APIError as e:
+    except openai.error.OpenAIError as e:
         return f"API 오류가 발생했습니다: {str(e)}"
     except openai.error.AuthenticationError as e:
         return f"인증 오류가 발생했습니다: {str(e)}"
