@@ -110,10 +110,6 @@ def process_input(input_content, input_type, criteria, custom_prompt):
 
     except openai.error.OpenAIError as e:
         return f"API 오류가 발생했습니다: {str(e)}"
-    except openai.error.AuthenticationError as e:
-        return f"인증 오류가 발생했습니다: {str(e)}"
-    except openai.error.RateLimitError as e:
-        return f"요청 한도를 초과했습니다: {str(e)}"
     except Exception as e:
         return f"알 수 없는 오류가 발생했습니다: {str(e)}"
 
