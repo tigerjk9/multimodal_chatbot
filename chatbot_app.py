@@ -181,7 +181,7 @@ def main():
     <div class='service-summary'>
         이 챗봇은 여러분의 학습 여정을 돕기 위해 만들어졌어요! 📚✨<br>
         여러분이 작성한 텍스트나 그림(이미지)을 분석해서 꼼꼼한 피드백을 제공해드려요. 💌<br>
-        맞춤형 조언으로 여러분의 실력 향상을 응원합니다. 함께 성장해 나가요! �😊
+        맞춤형 조언으로 여러분의 실력 향상을 응원합니다. 함께 성장해 나가요! 🚀😊
     </div>
     """, unsafe_allow_html=True)
 
@@ -200,7 +200,7 @@ def main():
         # Option to use a custom prompt
         use_custom_prompt = st.checkbox("🎭 사용자 정의 프롬프트 사용", key="use_custom_prompt_checkbox")
         custom_prompt_template = "" # Initialize
-        default_custom_prompt = "안녕 선생님! 다음 {content}를 '{criteria}' 기준으로 평가해줘. 좋은 점, 개선할 점, 그리고 앞으로 어떻게 하면 좋을지 간단히 조언해주면 좋겠어. 고마워! 😊"
+        default_custom_prompt = "안녕! 다음 {content}를 '{criteria}' 기준으로 평가해줘. 좋은 점, 개선할 점, 그리고 앞으로 어떻게 하면 좋을지 간단히 조언해주면 좋겠어. 고마워! 😊"
         
         if use_custom_prompt:
             st.write("아래 프롬프트 템플릿을 수정하여 AI의 응답 스타일을 조절할 수 있습니다. `{content}`와 `{criteria}`는 자동으로 채워집니다.")
@@ -290,6 +290,8 @@ def main():
         feedback_display = st.session_state.get('feedback', "아직 생성된 피드백이 없습니다. 왼쪽에서 내용을 입력하고 '피드백 생성' 버튼을 눌러주세요.")
         st.markdown(f"<div class='feedback-box'>{feedback_display}</div>", unsafe_allow_html=True)
 
+# 이 아래 부분이 295번째 줄 근처입니다.
+# 오류가 발생한 줄에 보이지 않는 특수 문자가 있는지 확인해보세요.
+# 또는 파일을 저장할 때 인코딩이 UTF-8로 되어 있는지 확인해주세요.
 if __name__ == "__main__":
     main()
-�
